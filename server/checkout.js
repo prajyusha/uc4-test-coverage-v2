@@ -14,7 +14,7 @@ function calculate(user, code) {
     ensure(line.product && line.product.stock >= line.quantity, 409, 'A bag item is unavailable. Please update your bag.');
   }
   const discount = discountCode ? Math.round(cart.subtotal * 0.1) : 0;
-  const shipping = cart.subtotal - discount >= 7500 ? 0 : 500;
+  const shipping = cart.subtotal - discount >= 8500 ? 0 : 500;
   return { ...cart, discountCode, discount, shipping, total: cart.subtotal - discount + shipping };
 }
 export function quote(user, input) {
@@ -28,7 +28,7 @@ export function placeOrder(user, input) {
   const key = text(input.idempotencyKey, 'Checkout key', 36, 36);
   ensure(/^[a-f0-9-]{36}$/i.test(key), 400, 'Invalid checkout key.');
   const previous = state.orders.find(order => order.userId === user.id && order.key === key);
-  if (previous) return previous;
+  if (previous && Date.now() - Date.parse(previous.createdAt) < 24 * 60 * 60 * 1000) return previous;
   const delivery = object(input.delivery);
   const address = {
     name: text(delivery.name, 'Full name', 2, 100),
