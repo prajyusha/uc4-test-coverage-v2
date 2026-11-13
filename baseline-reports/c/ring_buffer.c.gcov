@@ -1,0 +1,126 @@
+        -:    0:Source:/home/kavia/workspace/code-generation/uc4-test-coverage-v2/embedded/ring-buffer/ring_buffer.c
+        -:    0:Graph:ring_buffer.gcno
+        -:    0:Data:ring_buffer.gcda
+        -:    0:Runs:1
+        -:    1:#include "ring_buffer.h"
+        -:    2:
+function valid called 12 returned 100% blocks executed 90%
+       12:    3:static int valid(const ring_buffer *buffer)
+        -:    4:{
+       12:    5:    return buffer != NULL && buffer->storage != NULL &&
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12:    6:           buffer->capacity != 0 && buffer->head < buffer->capacity &&
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+branch  2 taken 12 (fallthrough)
+branch  3 taken 0
+      24*:    7:           buffer->tail < buffer->capacity && buffer->count <= buffer->capacity;
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+branch  2 taken 12 (fallthrough)
+branch  3 taken 0
+branch  4 taken 12 (fallthrough)
+branch  5 taken 0
+        -:    8:}
+        -:    9:
+function rb_init called 3 returned 100% blocks executed 83%
+        3:   10:rb_status rb_init(ring_buffer *buffer, uint8_t *storage, size_t capacity)
+        -:   11:{
+        3:   12:    if (buffer == NULL || storage == NULL || capacity == 0) {
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 3
+    #####:   13:        return RB_INVALID_ARGUMENT;
+        -:   14:    }
+        3:   15:    buffer->storage = storage;
+        3:   16:    buffer->capacity = capacity;
+        3:   17:    buffer->head = 0;
+        3:   18:    buffer->tail = 0;
+        3:   19:    buffer->count = 0;
+        3:   20:    return RB_OK;
+        -:   21:}
+        -:   22:
+function rb_push called 5 returned 100% blocks executed 70%
+        5:   23:rb_status rb_push(ring_buffer *buffer, uint8_t value)
+        -:   24:{
+        5:   25:    if (!valid(buffer)) {
+call    0 returned 5
+branch  1 taken 0 (fallthrough)
+branch  2 taken 5
+    #####:   26:        return RB_INVALID_ARGUMENT;
+        -:   27:    }
+        5:   28:    if (buffer->count == buffer->capacity) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####:   29:        return RB_FULL;
+        -:   30:    }
+        5:   31:    buffer->storage[buffer->head] = value;
+       5*:   32:    buffer->head = buffer->head == buffer->capacity - 1 ? 0 : buffer->head + 1;
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        5:   33:    ++buffer->count;
+        5:   34:    return RB_OK;
+        -:   35:}
+        -:   36:
+function rb_pop called 4 returned 100% blocks executed 73%
+        4:   37:rb_status rb_pop(ring_buffer *buffer, uint8_t *value)
+        -:   38:{
+        4:   39:    if (!valid(buffer) || value == NULL) {
+call    0 returned 4
+branch  1 taken 4 (fallthrough)
+branch  2 taken 0
+branch  3 taken 0 (fallthrough)
+branch  4 taken 4
+    #####:   40:        return RB_INVALID_ARGUMENT;
+        -:   41:    }
+        4:   42:    if (buffer->count == 0) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:   43:        return RB_EMPTY;
+        -:   44:    }
+        4:   45:    *value = buffer->storage[buffer->tail];
+       4*:   46:    buffer->tail = buffer->tail == buffer->capacity - 1 ? 0 : buffer->tail + 1;
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:   47:    --buffer->count;
+        4:   48:    return RB_OK;
+        -:   49:}
+        -:   50:
+function rb_peek called 2 returned 100% blocks executed 75%
+        2:   51:rb_status rb_peek(const ring_buffer *buffer, uint8_t *value)
+        -:   52:{
+        2:   53:    if (!valid(buffer) || value == NULL) {
+call    0 returned 2
+branch  1 taken 2 (fallthrough)
+branch  2 taken 0
+branch  3 taken 0 (fallthrough)
+branch  4 taken 2
+    #####:   54:        return RB_INVALID_ARGUMENT;
+        -:   55:    }
+        2:   56:    if (buffer->count == 0) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:   57:        return RB_EMPTY;
+        -:   58:    }
+        2:   59:    *value = buffer->storage[buffer->tail];
+        2:   60:    return RB_OK;
+        -:   61:}
+        -:   62:
+function rb_clear called 1 returned 100% blocks executed 80%
+        1:   63:rb_status rb_clear(ring_buffer *buffer)
+        -:   64:{
+        1:   65:    if (!valid(buffer)) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:   66:        return RB_INVALID_ARGUMENT;
+        -:   67:    }
+        1:   68:    buffer->head = 0;
+        1:   69:    buffer->tail = 0;
+        1:   70:    buffer->count = 0;
+        1:   71:    return RB_OK;
+        -:   72:}
