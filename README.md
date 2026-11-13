@@ -61,4 +61,52 @@ This is a **single-process demonstration**, not a production payment platform. J
 
 Use HTTPS and `NODE_ENV=production` in production so cookies are Secure. Do not set production mode for plain-HTTP local use. A production deployment also needs a database, shared session/rate-limit storage, monitoring, backup policies, and a supported Node release (Node 18 is end-of-life, but is supported by this code as requested).
 
-No test suite is included. Earlier environment smoke fixtures have been removed.
+## Tests and coverage
+
+The project uses Vitest 3.2.7 with Istanbul coverage for server modules and Playwright 1.56.1 with Chromium for browser checks. Monocart Coverage Reports 2.12.1 processes Chromium's native JavaScript coverage, maps it to the React source, and produces the browser and merged reports. These versions run on system Node 18.20.8.
+
+Install the locked dependencies and Chromium, then run both suites and generate reports:
+
+```sh
+npm ci
+npm run test:e2e:install
+npm run test:coverage
+```
+
+In this workspace, where the browser cache is shared, use:
+
+```sh
+PATH=/usr/bin:/bin /usr/bin/node /usr/bin/npm ci --engine-strict
+PATH=/usr/bin:/bin PLAYWRIGHT_BROWSERS_PATH=/ms-playwright npm run test:e2e:install
+PATH=/usr/bin:/bin CI=true PLAYWRIGHT_BROWSERS_PATH=/ms-playwright npm run test:coverage
+```
+
+`npm test` runs the server checks without coverage. `npm run test:server` generates server coverage; `npm run test:e2e` builds a source-mapped frontend and runs the browser checks with coverage. `npm run coverage:merge` combines the latest server and browser coverage data; run both suites first to refresh that data.
+
+There are three server checks and three browser checks covering customer sign-in, catalog browsing/search, and adding a product to the bag. Server fixtures use a shopper account whose password is supplied through the test environment. The Playwright server receives both `SHOP_USER_PASSWORD` and `SHOP_ADMIN_PASSWORD` through its configured environment when provisioning the demo store. The checked-in values are test-only fixtures, not deployment credentials. Each suite uses a temporary `SHOP_DATA_FILE` and removes its store after the run; normal shop data is not used. The browser server uses port 4178 and refuses to reuse another running server.
+
+### Report locations
+
+| Scope | LCOV | HTML |
+| --- | --- | --- |
+| Server | `coverage/server/lcov.info` | `coverage/server/index.html` |
+| Browser | `coverage/browser/lcov.info` | `coverage/browser/html/index.html` |
+| Merged | `coverage/merged/lcov.info` | `coverage/merged/index.html` |
+
+The browser also has a native V8 report at `coverage/browser/index.html`. Each scope includes `coverage-final.json` and `coverage-summary.json`. Generated coverage, browser traces, and build output are ignored by Git and recreated by the commands above.
+
+### Measured results
+
+The system Node 18.20.8 run passed all six checks and produced:
+
+| Scope | Statements | Branches | Functions | Lines |
+| --- | ---: | ---: | ---: | ---: |
+| Server | 31.88% | 27.45% | 36.23% | 36.27% |
+| Browser | 50.93% | 35.09% | 35.71% | 59.45% |
+| Merged | 39.27% | 32.01% | 35.97% | 44.44% |
+
+Server coverage includes all eight `server/*.js` modules, including unimported modules. Browser coverage measures `src/main.jsx`, excluding dependencies and generated bundle code. The merged report combines those nine source files; it sums covered and total counters, rather than averaging suite percentages. Browser coverage does not include execution inside the Express process. Overall statement coverage is 163 of 415 statements (39.27%); line coverage uses a separate denominator.
+
+### Tooling security
+
+`npm audit --omit=dev` reported no production dependency vulnerabilities in the measured run. The full audit reported seven development-tooling advisories, including critical advisories in Vitest's worker dependency. Some available fixes require moving beyond Node 18. Run these tools only against trusted project code in an isolated development or CI environment; do not expose their development interfaces publicly.

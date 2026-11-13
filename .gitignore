@@ -5,3 +5,6 @@ data/
 *.log
 .kavia/
 logs/
+coverage/
+test-results/
+playwright-report/
