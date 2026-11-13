@@ -63,6 +63,8 @@ Use HTTPS and `NODE_ENV=production` in production so cookies are Secure. Do not 
 
 ## Tests and coverage
 
+For the REQ-010 bag limits, REQ-013 discount code and REQ-016 delivery-details catalog review, additional cases, setup instructions and execution results, see the [targeted QA guide](qa/README.md).
+
 The project uses Vitest 3.2.7 with Istanbul coverage for server modules and Playwright 1.56.1 with Chromium for browser checks. Monocart Coverage Reports 2.12.1 processes Chromium's native JavaScript coverage, maps it to the React source, and produces the browser and merged reports. These versions run on system Node 18.20.8.
 
 Install the locked dependencies and Chromium, then run both suites and generate reports:
